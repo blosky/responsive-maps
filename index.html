@@ -1,94 +1,95 @@
 <html>
 <head>
-  <meta charset="utf-8">
-  <script src="http://d3js.org/d3.v3.min.js"></script>
-  <script src="http://d3js.org/topojson.v1.min.js"></script>
-  
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta charset="utf-8">
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="http://d3js.org/topojson.v1.min.js"></script>
+	
 
-  <style type="text/css">
-    body{padding: 0;margin: 0;}
-    
-    #map{position: relative;float: left;width: 860px; height: auto; border:1px solid red;}
-    #annotations{position: absolute; top: 0; left: 0;width: 100%; height: auto;pointer-events: none;}
-    #interact{position: absolute; top: 0; left: 0;width: 100%; height: auto;pointer-events: none;}
-    #interact_inset{position: absolute; top: 0; left: 0;width: 100%; height: auto;pointer-events: none;}
-    #inset{position: relative; float:right;top: 0; left: 0;width: 25%; height: auto;}
+	<style type="text/css">
+		body{padding: 0;margin: 0;}
+		
+		#map{position: relative;float: left;width: 860px; height: auto; border:1px solid red;}
+		#annotations{position: absolute; top: 0; left: 0;width: 100%; height: auto;pointer-events: none;}
+		#interact{position: absolute; top: 0; left: 0;width: 100%; height: auto;pointer-events: none;}
+		#interact_inset{position: absolute; top: 0; left: 0;width: 100%; height: auto;pointer-events: none;}
+		#inset{position: relative; float:right;top: 0; left: 0;width: 25%; height: auto;}
 
-    .inset{position:relative;float:left; width: 620px;height:auto;}
-    .grey{fill:#f1f1f1;}
-
-
-
-
-	.q9-9{fill:#4BC6DF;}  
-	.q8-9{fill:#57B4D2;}
-	.q7-9{fill:#63A2C4;}
-	.q6-9{fill:#6F8FB7;}
-	.q5-9{fill:#7B7DA9;}
-	.q4-9{fill:#886B9C;}
-	.q3-9{fill:#94598E;}
-	.q2-9{fill:#A04681;}
-	.q1-9{fill:#AC3473;}
-	.q0-9{fill:#B82266;}
+		.inset{position:relative;float:left; width: 620px;height:auto;}
+		.grey{fill:#f1f1f1;}
 
 
-	path.selected {
-			  stroke: white;
-			  stroke-width: 1px;
-			  fill: none;
-			  stroke-linejoin:round;
+
+
+		.q9-9{fill:#4BC6DF;}  
+		.q8-9{fill:#57B4D2;}
+		.q7-9{fill:#63A2C4;}
+		.q6-9{fill:#6F8FB7;}
+		.q5-9{fill:#7B7DA9;}
+		.q4-9{fill:#886B9C;}
+		.q3-9{fill:#94598E;}
+		.q2-9{fill:#A04681;}
+		.q1-9{fill:#AC3473;}
+		.q0-9{fill:#B82266;}
+
+
+		path.selected {
+			stroke: white;
+			stroke-width: 1px;
+			fill: none;
+			stroke-linejoin:round;
 		}
-	#map path.london
-	{
-		stroke: black;
-		stroke-width: 1.5px;
-		fill: none;
-		stroke-linejoin:round;
-	}
+		#map path.london
+		{
+			stroke: black;
+			stroke-width: 1.5px;
+			fill: none;
+			stroke-linejoin:round;
+		}
 
-	#subhead1{position: absolute; float: left; width: 25%; top:3em;}
+		#subhead1{position: absolute; float: left; width: 25%; top:3em;}
 
 
-@media screen and (max-width: 860px){
-	#map{width: 100%; }
-  	.inset{left:0%;}
-}
-@media screen and (max-width: 400px){
-  #inset{position:relative;float: left;left: 50%;}
-}
-    
-  </style>
+		@media screen and (max-width: 860px){
+			#map{width: 100%; }
+			.inset{left:0%;}
+		}
+		@media screen and (max-width: 400px){
+			#inset{position:relative;float: left;left: 50%;}
+		}
+		
+	</style>
 </head>
 <body>
 
-<h1>Headline</h1>
-<span id='subhead1'>During the manhunt police described him as "highly dangerous" and said they had "no doubt" the shooting was a hate crime.</span>
-  
-  <script>
+	<h1>Headline</h1>
+	<span id='subhead1'>During the manhunt police described him as "highly dangerous" and said they had "no doubt" the shooting was a hate crime.</span>
+	
+	<script>
 
-    var quantile = d3.scale.quantile()
-    .domain([-100, 100])
-    .range(d3.range(10).map(function(i) { return "q" + i + "-9"; }));
+		var quantile = d3.scale.quantile()
+		.domain([-100, 100])
+		.range(d3.range(10).map(function(i) { return "q" + i + "-9"; }));
 
-    var width = 860,
-    height = 700;
+		var width = 860,
+		height = 700;
 
-    var insetW = 250;
-    var insetH = 200;
+		var insetW = 250;
+		var insetH = 200;
 
-    var  ratio = width / height;
-    var scale = 35;
-    var newScale;
+		var  ratio = width / height;
+		var scale = 35;
+		var newScale;
 
-    var bbox;
-    var dx,
-    dy;
+		var bbox;
+		var dx,
+		dy;
 
-    var constituencies = [];
-    var constituencies_map = {};
+		var constituencies = [];
+		var constituencies_map = {};
 
-    var constituencies_london = [];
-    var constituencies_london_map = {};
+		var constituencies_london = [];
+		var constituencies_london_map = {};
 
 //var projection = d3.geo.azimuthalEquidistant()
 var projection = d3.geo.mercator();
@@ -102,21 +103,21 @@ var map = d3.select("body").append("div")
 .attr('id','map')
 .append('svg')
 .attr("viewBox", "0 0 " + width + " " + height )
-.attr("preserveAspectRatio", "xMinYMin");
+.attr("preserveAspectRatio", "xMinYMid");
 
 
 var mapAnnotations = d3.select('#map')
 .append('svg')
 .attr('id','annotations')
 .attr("viewBox", "0 0 " + width + " " + height )
-.attr("preserveAspectRatio", "xMinYMin")
+.attr("preserveAspectRatio", "xMinYMid")
 .append('g');
 
 var interact = d3.select('#map')
 .append('svg')
 .attr('id','interact')
 .attr("viewBox", "0 0 " + width + " " + height )
-.attr("preserveAspectRatio", "xMinYMin")
+.attr("preserveAspectRatio", "xMinYMid")
 .append('g')
 .append('path');
 
@@ -125,13 +126,13 @@ var inset = d3.select("body").append("div")
 .attr('id','inset')
 .append('svg')
 .attr("viewBox", "0 0 " + insetW + " " + insetH )
-.attr("preserveAspectRatio", "xMinYMin");
+.attr("preserveAspectRatio", "xMinYMid");
 
 var interact_inset = d3.select('#inset')
 .append('svg')
 .attr('id','interact_inset')
 .attr("viewBox", "0 0 " + insetW + " " + insetH )
-.attr("preserveAspectRatio", "xMinYMin")
+.attr("preserveAspectRatio", "xMinYMid")
 .append('g')
 .append('path');
 
@@ -140,90 +141,90 @@ var clone;
 
 d3.json("facilities_.topojson", function(error, uk)
 {
-  if (error) return console.error(error);
+	if (error) return console.error(error);
 
-  var features = topojson.feature(uk, uk.objects.facilities_);
+	var features = topojson.feature(uk, uk.objects.facilities_);
 
-  var center = getCenter(features);
-  
-  newScale = getScale(features, scale);
+	var center = getCenter(features);
+	
+	newScale = getScale(features, scale);
 
-  projection
-  .center(center)
-  .scale(newScale)
-  .translate([width/2, height/2]);
+	projection
+	.center(center)
+	.scale(newScale)
+	.translate([width/2, height/2]);
 
-  var england = map.selectAll('.westminster')
-  .data(features.features)
-  .enter();
+	var england = map.selectAll('.westminster')
+	.data(features.features)
+	.enter();
 
-  england
-  .append('path')
-  .attr("class", function(d)
-  {
-  	if(d.properties.variation != 0 && d.properties.n1112 > 0 && d.properties.n1415 > 0 && d.properties.variation != 100 && d.properties.variation != null)
-  	{
-  		return d.properties.LAD14CD + ' land ' + d.properties.Class +' '+ d.properties.LAD14NM + ' ' +quantile(d.properties.variation) + " " + d.properties.variation  + " " + d.properties.n1415 + " " + d.properties.n1112 + " " + d.properties.LAD14CD;
-  	}
-  	else
-  	{
+	england
+	.append('path')
+	.attr("class", function(d)
+	{
+		if(d.properties.variation != 0 && d.properties.n1112 > 0 && d.properties.n1415 > 0 && d.properties.variation != 100 && d.properties.variation != null)
+		{
+			return d.properties.LAD14CD + ' land ' + d.properties.Class +' '+ d.properties.LAD14NM + ' ' +quantile(d.properties.variation) + " " + d.properties.variation  + " " + d.properties.n1415 + " " + d.properties.n1112 + " " + d.properties.LAD14CD;
+		}
+		else
+		{
 
-  		return 'land grey'
-  	}
-  })
+			return 'land grey'
+		}
+	})
 
-  .attr("d", path)
-  .style('stroke', '#f1f1f1')
-  .style('stroke-width', .25);
+	.attr("d", path)
+	.style('stroke', '#f1f1f1')
+	.style('stroke-width', .25);
 
- constituencies = setCentroids(map, constituencies_map);
-
-
-
-map
- .append("path")
- .datum(topojson.merge(uk, uk.objects.facilities_.geometries.filter(function(d) { return d.properties.Class == 'L' })))
-      .attr("class", "london")
-      .attr("d", path);
-
-  var featuresLondon = features.features.filter(function(d){return d.properties.Class == 'L'});
-
-  projectionLondon
-  .center([-0.1015987,51.48])
-
-  .scale(16000)
-  .translate([insetW/2, insetH/2])
+	constituencies = setCentroids(map, constituencies_map);
 
 
- inset.selectAll('.constituencies')
-  .data(featuresLondon)
-  .enter()
-  .append('path')
-  .attr("class", function(d)
-  {
-  	
-  	if(d.properties.variation != 0 && d.properties.n1112 > 0 && d.properties.n1415 > 0  && d.properties.variation != 100)
-  	{
-  		return d.properties.LAD14CD + ' ' + d.properties.Class +' '+ d.properties.LAD14NM + ' ' +quantile(d.properties.variation) + " " + d.properties.variation + " " + d.properties.n1415 + " " + d.properties.n1112;
-  	}
-  	else
-  	{
 
-  		return 'grey'
-  	}
-  })
-  .attr('d', d3.geo.path().projection(projectionLondon))
-  .style('stroke', '#f1f1f1')
-  .style('stroke-width', .25);
+	map
+	.append("path")
+	.datum(topojson.merge(uk, uk.objects.facilities_.geometries.filter(function(d) { return d.properties.Class == 'L' })))
+	.attr("class", "london")
+	.attr("d", path);
+
+	var featuresLondon = features.features.filter(function(d){return d.properties.Class == 'L'});
+
+	projectionLondon
+	.center([-0.1015987,51.48])
+
+	.scale(16000)
+	.translate([insetW/2, insetH/2])
 
 
-var p = map.selectAll('.E09000002').attr("d");
-setClone(p, mapAnnotations);
+	inset.selectAll('.constituencies')
+	.data(featuresLondon)
+	.enter()
+	.append('path')
+	.attr("class", function(d)
+	{
+		
+		if(d.properties.variation != 0 && d.properties.n1112 > 0 && d.properties.n1415 > 0  && d.properties.variation != 100)
+		{
+			return d.properties.LAD14CD + ' ' + d.properties.Class +' '+ d.properties.LAD14NM + ' ' +quantile(d.properties.variation) + " " + d.properties.variation + " " + d.properties.n1415 + " " + d.properties.n1112;
+		}
+		else
+		{
+
+			return 'grey'
+		}
+	})
+	.attr('d', d3.geo.path().projection(projectionLondon))
+	.style('stroke', '#f1f1f1')
+	.style('stroke-width', .25);
 
 
-constituencies_london = setCentroids(inset, constituencies_london_map);
+	var p = map.selectAll('.E09000002').attr("d");
+	setClone(p, mapAnnotations);
 
- setInteractivity()
+
+	constituencies_london = setCentroids(inset, constituencies_london_map);
+
+	setInteractivity()
 
 });
 
@@ -231,9 +232,9 @@ constituencies_london = setCentroids(inset, constituencies_london_map);
 function setClone(path, svg)
 {
 	clone=svg.append("g")
-  		.attr("id","clone")
-		.append("path")
-		.attr("class","selected");
+	.attr("id","clone")
+	.append("path")
+	.attr("class","selected");
 
 	clone.attr("d",path);
 }
@@ -247,11 +248,11 @@ function setCentroids(_svg, object)
 		var id = this.getAttribute("class").split(" ")[0];
 
 		if(!object[id]) {
-				object[id]={
-					centroids:[],
-					paths:[]
-				};
-			}
+			object[id]={
+				centroids:[],
+				paths:[]
+			};
+		}
 
 
 		object[id].centroids.push(getCentroid(this));
@@ -260,125 +261,125 @@ function setCentroids(_svg, object)
 
 
 	return d3.entries(object).map(function(d){
-			return {
-				id:d.key,
-				paths:d.value.paths,
-				centroid:[
-					d3.mean(d.value.centroids,function(c){
-						return c[0]
-					}),
-					d3.mean(d.value.centroids,function(c){
-						return c[1]
-					})
-				]
-			}
-		});
+		return {
+			id:d.key,
+			paths:d.value.paths,
+			centroid:[
+			d3.mean(d.value.centroids,function(c){
+				return c[0]
+			}),
+			d3.mean(d.value.centroids,function(c){
+				return c[1]
+			})
+			]
+		}
+	});
 
 }
 
-  function getScale(features,s)
-  {
-    var bbox = d3.geo.bounds(features);
-    var dx = bbox[1][0] - bbox[0][0];
-    var dy = bbox[1][1] - bbox[0][1];
-    var hscale  = (s*width)  / dx;
-    var vscale  = (s*height) / dy;
+function getScale(features,s)
+{
+	var bbox = d3.geo.bounds(features);
+	var dx = bbox[1][0] - bbox[0][0];
+	var dy = bbox[1][1] - bbox[0][1];
+	var hscale  = (s*width)  / dx;
+	var vscale  = (s*height) / dy;
 
-    return (hscale < vscale) ? hscale : vscale;
-  }
+	return (hscale < vscale) ? hscale : vscale;
+}
 
-  function getCenter(features)
-  {
-    var bbox = d3.geo.bounds(features);
-    var x = (bbox[0][0] + bbox[1][0]) / 2;
-    var y = (bbox[0][1] + bbox[1][1]) / 2;
+function getCenter(features)
+{
+	var bbox = d3.geo.bounds(features);
+	var x = (bbox[0][0] + bbox[1][0]) / 2;
+	var y = (bbox[0][1] + bbox[1][1]) / 2;
 
-    return [x,y];
-  }
+	return [x,y];
+}
 
 
 function setInteractivity()
 {
- map
-  .on('mousemove', function(d)
-  {
-  	var coords = d3.mouse(this);
+	map
+	.on('mousemove', function(d)
+	{
+		var coords = d3.mouse(this);
 
-  	var h = map.selectAll('.'+findClosest(coords, constituencies).id).attr("d");
+		var h = map.selectAll('.'+findClosest(coords, constituencies).id).attr("d");
 
-	d3.select('#interact g path')
-	.attr('d', h)
-	.attr('class','selected')
-	
-  })
-  .on("mouseout", function(d){
 		d3.select('#interact g path')
-	.attr('d', '')
-	.attr('class','')
-});
+		.attr('d', h)
+		.attr('class','selected')
+		
+	})
+	.on("mouseout", function(d){
+		d3.select('#interact g path')
+		.attr('d', '')
+		.attr('class','')
+	});
 
 
 
-  inset
-  .on('mousemove', function(d)
-  {
-  	var coords = d3.mouse(this);
-  	
-  	var h = inset.selectAll('.'+ findClosest(coords, constituencies_london).id).attr("d");
+	inset
+	.on('mousemove', function(d)
+	{
+		var coords = d3.mouse(this);
+		
+		var h = inset.selectAll('.'+ findClosest(coords, constituencies_london).id).attr("d");
 
-	d3.select('#interact_inset g path')
-	.attr('d', h)
-	.attr('class','selected')
-	
-  })
-  .on("mouseout", function(d){
 		d3.select('#interact_inset g path')
-	.attr('d', '')
-	.attr('class','')
-})
+		.attr('d', h)
+		.attr('class','selected')
+		
+	})
+	.on("mouseout", function(d){
+		d3.select('#interact_inset g path')
+		.attr('d', '')
+		.attr('class','')
+	})
 
 }
 
- 
 
 
 
-  function findClosest(coords,array) {
 
-        var closest_constituency=null,
-            dist=1000000;
+function findClosest(coords,array) {
 
-        array.every(function(constituency){
-            
-            var c_centre=constituency.centroid,
-                __dist=getDistance(coords[0],coords[1],c_centre[0],c_centre[1]);
+	var closest_constituency=null,
+	dist=1000000;
+
+	array.every(function(constituency){
+		
+		var c_centre=constituency.centroid,
+		__dist=getDistance(coords[0],coords[1],c_centre[0],c_centre[1]);
 
             //console.log("check",coords,"against",c_centre,__dist,constituency.key)
 
             if(__dist<dist) {
-                closest_constituency=constituency;
-                dist=__dist;
+            	closest_constituency=constituency;
+            	dist=__dist;
             }
 
             return __dist>5;
             
         });
 
-        
+	
 
 
-        return closest_constituency;
-    }
+	return closest_constituency;
+}
 
- function getDistance(x1,y1,x2,y2)
- {
- 	return Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
- }
+function getDistance(x1,y1,x2,y2)
+{
+	return Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+}
 
- function getCentroid(element)
- {
- 	var bbox = element.getBBox();
- 	return [bbox.x + bbox.width/2, bbox.y + bbox.height/2];
+function getCentroid(element)
+{
+	var bbox = element.getBBox();
+	return [bbox.x + bbox.width/2, bbox.y + bbox.height/2];
 }
 
 
