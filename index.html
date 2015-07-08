@@ -49,6 +49,9 @@
 
 	#subhead1{position: absolute; float: left; width: 25%; top:3em;}
 
+	#tooltip{position: absolute; width: 200px; height: auto;}
+	#tooltip p{width: 200px; background-color: red;}
+
 
 @media screen and (max-width: 860px){
 	#map{width: 100%; height: auto;}
@@ -136,8 +139,11 @@ var interact_inset = d3.select('#inset')
 .append('g')
 .append('path');
 
-
 var clone;
+
+var tooltip = d3.select("body").append("div")
+.attr('id', 'tooltip')
+.append('span');
 
 d3.json("facilities_.topojson", function(error, uk)
 {
@@ -309,7 +315,15 @@ function setInteractivity()
 
 	d3.select('#interact g path')
 	.attr('d', h)
-	.attr('class','selected')
+	.attr('class','selected');
+
+	d3.select('#tooltip')
+	.style('top', coords[1] + 'px')
+	.style('left', coords[0] + 'px')
+
+	tooltip
+	.text(h)
+	
 	
   })
   .on("mouseout", function(d){
