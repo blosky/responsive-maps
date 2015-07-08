@@ -50,8 +50,8 @@
 	#subhead1{position: absolute; float: left; width: 25%; top:3em;}
 
 
-@media screen and (max-width: 860px){
-	#map{width: 100%; }
+@media screen and (max-width: 860px;){
+	#map{width: 100%; height: 600px;}
   	.inset{left:0%;}
 }
 @media screen and (max-width: 400px){
@@ -103,21 +103,21 @@ var map = d3.select("body").append("div")
 .attr('id','map')
 .append('svg')
 .attr("viewBox", "0 0 " + width + " " + height )
-.attr("preserveAspectRatio", "xMinYMin");
+.attr("preserveAspectRatio", "xMinYMid");
 
 
 var mapAnnotations = d3.select('#map')
 .append('svg')
 .attr('id','annotations')
 .attr("viewBox", "0 0 " + width + " " + height )
-.attr("preserveAspectRatio", "xMinYMin")
+.attr("preserveAspectRatio", "xMinYMid")
 .append('g');
 
 var interact = d3.select('#map')
 .append('svg')
 .attr('id','interact')
 .attr("viewBox", "0 0 " + width + " " + height )
-.attr("preserveAspectRatio", "xMinYMin")
+.attr("preserveAspectRatio", "xMinYMid")
 .append('g')
 .append('path');
 
@@ -126,13 +126,13 @@ var inset = d3.select("body").append("div")
 .attr('id','inset')
 .append('svg')
 .attr("viewBox", "0 0 " + insetW + " " + insetH )
-.attr("preserveAspectRatio", "xMinYMin");
+.attr("preserveAspectRatio", "xMinYMid");
 
 var interact_inset = d3.select('#inset')
 .append('svg')
 .attr('id','interact_inset')
 .attr("viewBox", "0 0 " + insetW + " " + insetH )
-.attr("preserveAspectRatio", "xMinYMin")
+.attr("preserveAspectRatio", "xMinYMid")
 .append('g')
 .append('path');
 
