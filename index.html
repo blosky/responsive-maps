@@ -50,7 +50,7 @@
 	#subhead1{position: absolute; float: left; width: 25%; top:3em;}
 
 	#tooltip{position: absolute;}
-	#tooltip span{width: 200px; height: auto;background-color: red;}
+	#tooltip p{width: 50px; height: auto;background-color: red;}
 
 
 @media screen and (max-width: 860px){
@@ -143,7 +143,7 @@ var clone;
 
 var tooltip = d3.select("body").append("div")
 .attr('id', 'tooltip')
-.append('span');
+.append('p');
 
 d3.json("facilities_.topojson", function(error, uk)
 {
@@ -170,7 +170,8 @@ d3.json("facilities_.topojson", function(error, uk)
   {
   	if(d.properties.variation != 0 && d.properties.n1112 > 0 && d.properties.n1415 > 0 && d.properties.variation != 100 && d.properties.variation != null)
   	{
-  		return d.properties.LAD14CD + ' land ' + d.properties.Class +' '+ d.properties.LAD14NM + ' ' +quantile(d.properties.variation) + " " + d.properties.variation  + " " + d.properties.n1415 + " " + d.properties.n1112 + " " + d.properties.LAD14CD;
+      var name = d.properties.LAD14NM.split(" ").join("_");
+  		return d.properties.LAD14CD + ' land ' + d.properties.Class +" "+ name + " " +quantile(d.properties.variation) + " " + d.properties.variation  + " " + d.properties.n1415 + " " + d.properties.n1112
   	}
   	else
   	{
@@ -211,7 +212,8 @@ map
   	
   	if(d.properties.variation != 0 && d.properties.n1112 > 0 && d.properties.n1415 > 0  && d.properties.variation != 100)
   	{
-  		return d.properties.LAD14CD + ' ' + d.properties.Class +' '+ d.properties.LAD14NM + ' ' +quantile(d.properties.variation) + " " + d.properties.variation + " " + d.properties.n1415 + " " + d.properties.n1112;
+       var name = d.properties.LAD14NM.split(" ").join("_");
+  		return d.properties.LAD14CD + ' ' + d.properties.Class +' '+ name + ' ' +quantile(d.properties.variation) + " " + d.properties.variation + " " + d.properties.n1415 + " " + d.properties.n1112;
   	}
   	else
   	{
@@ -310,19 +312,22 @@ function setInteractivity()
   {
 
   	var coords = d3.mouse(this);
+    var id = findClosest(coords, constituencies).id;
 
-  	var h = map.selectAll('.'+findClosest(coords, constituencies).id).attr("d");
+  	var h = map.selectAll('.'+id).attr("d");
+
+    var name = map.select('.'+id).attr('class').split(" ")[3].split("_").join(" ");
 
 	d3.select('#interact g path')
 	.attr('d', h)
 	.attr('class','selected');
 
 	d3.select('#tooltip')
-	.style('top', d3.event.clientY + 'px')
+	.style('top', d3.event.clientY + 20 + 'px')
 	.style('left', d3.event.clientX + 'px')
 
-	d3.select('#tooltip span')
-	.text(h)
+	d3.select('#tooltip p')
+	.text(name)
 	
 	
   })
