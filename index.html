@@ -49,8 +49,8 @@
 
 	#subhead1{position: absolute; float: left; width: 25%; top:3em;}
 
-	#tooltip{position: absolute; width: 200px; height: auto;}
-	#tooltip p{width: 200px; background-color: red;}
+	#tooltip{position: absolute;}
+	#tooltip span{width: 200px; height: auto;background-color: red;}
 
 
 @media screen and (max-width: 860px){
@@ -303,12 +303,12 @@ function setCentroids(_svg, object)
     return [x,y];
   }
 
-
 function setInteractivity()
 {
  map
   .on('mousemove', function(d)
   {
+
   	var coords = d3.mouse(this);
 
   	var h = map.selectAll('.'+findClosest(coords, constituencies).id).attr("d");
@@ -318,10 +318,10 @@ function setInteractivity()
 	.attr('class','selected');
 
 	d3.select('#tooltip')
-	.style('top', coords[1] + 'px')
-	.style('left', coords[0] + 'px')
+	.style('top', d3.event.clientY + 'px')
+	.style('left', d3.event.clientX + 'px')
 
-	tooltip
+	d3.select('#tooltip span')
 	.text(h)
 	
 	
