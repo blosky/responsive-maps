@@ -9,6 +9,8 @@
 
   <style type="text/css">
     body{padding: 0;margin: 0;}
+
+    h1{height: 500px;}
     
     #map{position: relative;float: left;width: 860px; height: auto; border:1px solid red;}
     #annotations{position: absolute; top: 0; left: 0;width: 100%; height: auto;pointer-events: none;}
@@ -66,6 +68,8 @@
 
   <h1>Headline</h1>
   <span id='subhead1'>During the manhunt police described him as "highly dangerous" and said they had "no doubt" the shooting was a hate crime.</span>
+
+  <div id='map'></div>
   
   <script>
 
@@ -101,8 +105,7 @@
     var path = d3.geo.path()
     .projection(projection);
 
-    var map = d3.select("body").append("div")
-    .attr('id','map')
+    var map = d3.select("#map")
     .append('svg')
     .attr("viewBox", "0 0 " + width + " " + height )
     .attr("preserveAspectRatio", "xMinYMid");
@@ -140,7 +143,7 @@
 
     var clone;
 
-    var tooltip = d3.select("body").append("div")
+    var tooltip = d3.select("#map").append("div")
     .attr('id', 'tooltip')
     .append('p');
 
@@ -159,11 +162,11 @@
       .scale(newScale)
       .translate([width/2, height/2]);
 
-      var england = map.selectAll('.westminster')
-      .data(features.features)
-      .enter();
+      console.log(map) 
 
-      england
+      map.selectAll('.westminster')
+      .data(features.features)
+      .enter()
       .append('path')
       .attr("class", function(d)
       {
@@ -316,6 +319,8 @@ function setInteractivity()
      .text('')},
     touchMoveCallback:function(coords)
     {
+
+      console.log(coords, d3.event.clientY)
       var id = findClosest(coords, constituencies).id;
       var h = map.selectAll('.'+id).attr("d");
       var name = map.select('.'+id).attr('class').split(" ")[3].split("_").join(" ");
@@ -325,7 +330,7 @@ function setInteractivity()
      .attr('class','selected');
 
      d3.select('#tooltip')
-     .style('top', coords[1] + 20 + 'px')
+     .style('top', coords[1] + 'px')
      .style('left', coords[0] + 'px')
 
      d3.select('#tooltip p')
@@ -350,9 +355,12 @@ map
    .attr('d', h)
    .attr('class','selected');
 
+
+   console.log(event.clientY, d3.event.clientY)
+
    d3.select('#tooltip')
-   .style('top', d3.event.clientY + 20 + 'px')
-   .style('left', d3.event.clientX + 'px')
+   .style('top', coords[1] + 'px')
+   .style('left', coords[0] + 'px')
 
    d3.select('#tooltip p')
    .text(name)
