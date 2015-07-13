@@ -4,6 +4,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="http://d3js.org/d3.v3.min.js"></script>
   <script src="http://d3js.org/topojson.v1.min.js"></script>
+  <script src="TouchEvents.js"></script>
   
 
   <style type="text/css">
@@ -19,54 +20,52 @@
     .grey{fill:#f1f1f1;}
 
 
+    .q9-9{fill:#4BC6DF;}
+    .q8-9{fill:#57B4D2;}
+    .q7-9{fill:#63A2C4;}
+    .q6-9{fill:#6F8FB7;}
+    .q5-9{fill:#7B7DA9;}
+    .q4-9{fill:#886B9C;}
+    .q3-9{fill:#94598E;}
+    .q2-9{fill:#A04681;}
+    .q1-9{fill:#AC3473;}
+    .q0-9{fill:#B82266;}
 
 
-	.q9-9{fill:#4BC6DF;}
-	.q8-9{fill:#57B4D2;}
-	.q7-9{fill:#63A2C4;}
-	.q6-9{fill:#6F8FB7;}
-	.q5-9{fill:#7B7DA9;}
-	.q4-9{fill:#886B9C;}
-	.q3-9{fill:#94598E;}
-	.q2-9{fill:#A04681;}
-	.q1-9{fill:#AC3473;}
-	.q0-9{fill:#B82266;}
+    path.selected {
+     stroke: white;
+     stroke-width: 1px;
+     fill: none;
+     stroke-linejoin:round;
+   }
+   #map path.london
+   {
+    stroke: black;
+    stroke-width: 1.5px;
+    fill: none;
+    stroke-linejoin:round;
+  }
+
+  #subhead1{position: absolute; float: left; width: 25%; top:3em;}
+
+  #tooltip{position: absolute;}
+  #tooltip p{width: 50px; height: auto;background-color: red;}
 
 
-	path.selected {
-			  stroke: white;
-			  stroke-width: 1px;
-			  fill: none;
-			  stroke-linejoin:round;
-		}
-	#map path.london
-	{
-		stroke: black;
-		stroke-width: 1.5px;
-		fill: none;
-		stroke-linejoin:round;
-	}
-
-	#subhead1{position: absolute; float: left; width: 25%; top:3em;}
-
-	#tooltip{position: absolute;}
-	#tooltip p{width: 50px; height: auto;background-color: red;}
-
-
-@media screen and (max-width: 860px){
-	#map{width: 100%; height: auto;}
-  	.inset{left:0%;}
-}
-@media screen and (max-width: 400px){
+  @media screen and (max-width: 860px){
+   #map{width: 100%; height: auto;}
+   .inset{left:0%;}
+ }
+ @media screen and (max-width: 400px){
   #inset{position:relative;float: left;left: 50%;}
 }
-    
-  </style>
+
+</style>
 </head>
 <body>
 
-<h1>Headline</h1>
-<span id='subhead1'>During the manhunt police described him as "highly dangerous" and said they had "no doubt" the shooting was a hate crime.</span>
+  <h1>Headline</h1>
+  <span id='subhead1'>During the manhunt police described him as "highly dangerous" and said they had "no doubt" the shooting was a hate crime.</span>
   
   <script>
 
@@ -94,157 +93,157 @@
     var constituencies_london = [];
     var constituencies_london_map = {};
 
-//var projection = d3.geo.azimuthalEquidistant()
-var projection = d3.geo.mercator();
-var projectionLondon = d3.geo.mercator();
+    //var projection = d3.geo.azimuthalEquidistant()
+    var projection = d3.geo.mercator();
+    var projectionLondon = d3.geo.mercator();
 
 
-var path = d3.geo.path()
-.projection(projection);
+    var path = d3.geo.path()
+    .projection(projection);
 
-var map = d3.select("body").append("div")
-.attr('id','map')
-.append('svg')
-.attr("viewBox", "0 0 " + width + " " + height )
-.attr("preserveAspectRatio", "xMinYMid");
-
-
-var mapAnnotations = d3.select('#map')
-.append('svg')
-.attr('id','annotations')
-.attr("viewBox", "0 0 " + width + " " + height )
-.attr("preserveAspectRatio", "xMinYMid")
-.append('g');
-
-var interact = d3.select('#map')
-.append('svg')
-.attr('id','interact')
-.attr("viewBox", "0 0 " + width + " " + height )
-.attr("preserveAspectRatio", "xMinYMid")
-.append('g')
-.append('path');
+    var map = d3.select("body").append("div")
+    .attr('id','map')
+    .append('svg')
+    .attr("viewBox", "0 0 " + width + " " + height )
+    .attr("preserveAspectRatio", "xMinYMid");
 
 
-var inset = d3.select("body").append("div")
-.attr('id','inset')
-.append('svg')
-.attr("viewBox", "0 0 " + insetW + " " + insetH )
-.attr("preserveAspectRatio", "xMinYMid");
+    var mapAnnotations = d3.select('#map')
+    .append('svg')
+    .attr('id','annotations')
+    .attr("viewBox", "0 0 " + width + " " + height )
+    .attr("preserveAspectRatio", "xMinYMid")
+    .append('g');
 
-var interact_inset = d3.select('#inset')
-.append('svg')
-.attr('id','interact_inset')
-.attr("viewBox", "0 0 " + insetW + " " + insetH )
-.attr("preserveAspectRatio", "xMinYMid")
-.append('g')
-.append('path');
-
-var clone;
-
-var tooltip = d3.select("body").append("div")
-.attr('id', 'tooltip')
-.append('p');
-
-d3.json("facilities_.topojson", function(error, uk)
-{
-  if (error) return console.error(error);
-
-  var features = topojson.feature(uk, uk.objects.facilities_);
-
-  var center = getCenter(features);
-  
-  newScale = getScale(features, scale);
-
-  projection
-  .center(center)
-  .scale(newScale)
-  .translate([width/2, height/2]);
-
-  var england = map.selectAll('.westminster')
-  .data(features.features)
-  .enter();
-
-  england
-  .append('path')
-  .attr("class", function(d)
-  {
-  	if(d.properties.variation != 0 && d.properties.n1112 > 0 && d.properties.n1415 > 0 && d.properties.variation != 100 && d.properties.variation != null)
-  	{
-      var name = d.properties.LAD14NM.split(" ").join("_");
-  		return d.properties.LAD14CD + ' land ' + d.properties.Class +" "+ name + " " +quantile(d.properties.variation) + " " + d.properties.variation  + " " + d.properties.n1415 + " " + d.properties.n1112
-  	}
-  	else
-  	{
-
-  		return 'land grey'
-  	}
-  })
-
-  .attr("d", path)
-  .style('stroke', '#f1f1f1')
-  .style('stroke-width', .25);
-
- constituencies = setCentroids(map, constituencies_map);
+    var interact = d3.select('#map')
+    .append('svg')
+    .attr('id','interact')
+    .attr("viewBox", "0 0 " + width + " " + height )
+    .attr("preserveAspectRatio", "xMinYMid")
+    .append('g')
+    .append('path');
 
 
+    var inset = d3.select("body").append("div")
+    .attr('id','inset')
+    .append('svg')
+    .attr("viewBox", "0 0 " + insetW + " " + insetH )
+    .attr("preserveAspectRatio", "xMinYMid");
 
-map
- .append("path")
- .datum(topojson.merge(uk, uk.objects.facilities_.geometries.filter(function(d) { return d.properties.Class == 'L' })))
+    var interact_inset = d3.select('#inset')
+    .append('svg')
+    .attr('id','interact_inset')
+    .attr("viewBox", "0 0 " + insetW + " " + insetH )
+    .attr("preserveAspectRatio", "xMinYMid")
+    .append('g')
+    .append('path');
+
+    var clone;
+
+    var tooltip = d3.select("body").append("div")
+    .attr('id', 'tooltip')
+    .append('p');
+
+    d3.json("facilities_.topojson", function(error, uk)
+    {
+      if (error) return console.error(error);
+
+      var features = topojson.feature(uk, uk.objects.facilities_);
+
+      var center = getCenter(features);
+
+      newScale = getScale(features, scale);
+
+      projection
+      .center(center)
+      .scale(newScale)
+      .translate([width/2, height/2]);
+
+      var england = map.selectAll('.westminster')
+      .data(features.features)
+      .enter();
+
+      england
+      .append('path')
+      .attr("class", function(d)
+      {
+       if(d.properties.variation != 0 && d.properties.n1112 > 0 && d.properties.n1415 > 0 && d.properties.variation != 100 && d.properties.variation != null)
+       {
+        var name = d.properties.LAD14NM.split(" ").join("_");
+        return d.properties.LAD14CD + ' land ' + d.properties.Class +" "+ name + " " +quantile(d.properties.variation) + " " + d.properties.variation  + " " + d.properties.n1415 + " " + d.properties.n1112
+      }
+      else
+      {
+
+        return 'land grey'
+      }
+    })
+
+      .attr("d", path)
+      .style('stroke', '#f1f1f1')
+      .style('stroke-width', .25);
+
+      constituencies = setCentroids(map, constituencies_map);
+
+
+
+      map
+      .append("path")
+      .datum(topojson.merge(uk, uk.objects.facilities_.geometries.filter(function(d) { return d.properties.Class == 'L' })))
       .attr("class", "london")
       .attr("d", path);
 
-  var featuresLondon = features.features.filter(function(d){return d.properties.Class == 'L'});
+      var featuresLondon = features.features.filter(function(d){return d.properties.Class == 'L'});
 
-  projectionLondon
-  .center([-0.1015987,51.48])
+      projectionLondon
+      .center([-0.1015987,51.48])
 
-  .scale(16000)
-  .translate([insetW/2, insetH/2])
-
-
- inset.selectAll('.constituencies')
-  .data(featuresLondon)
-  .enter()
-  .append('path')
-  .attr("class", function(d)
-  {
-  	
-  	if(d.properties.variation != 0 && d.properties.n1112 > 0 && d.properties.n1415 > 0  && d.properties.variation != 100)
-  	{
-       var name = d.properties.LAD14NM.split(" ").join("_");
-  		return d.properties.LAD14CD + ' ' + d.properties.Class +' '+ name + ' ' +quantile(d.properties.variation) + " " + d.properties.variation + " " + d.properties.n1415 + " " + d.properties.n1112;
-  	}
-  	else
-  	{
-
-  		return 'grey'
-  	}
-  })
-  .attr('d', d3.geo.path().projection(projectionLondon))
-  .style('stroke', '#f1f1f1')
-  .style('stroke-width', .25);
+      .scale(16000)
+      .translate([insetW/2, insetH/2])
 
 
-var p = map.selectAll('.E09000002').attr("d");
-setClone(p, mapAnnotations);
+      inset.selectAll('.constituencies')
+      .data(featuresLondon)
+      .enter()
+      .append('path')
+      .attr("class", function(d)
+      {
+
+       if(d.properties.variation != 0 && d.properties.n1112 > 0 && d.properties.n1415 > 0  && d.properties.variation != 100)
+       {
+         var name = d.properties.LAD14NM.split(" ").join("_");
+         return d.properties.LAD14CD + ' ' + d.properties.Class +' '+ name + ' ' +quantile(d.properties.variation) + " " + d.properties.variation + " " + d.properties.n1415 + " " + d.properties.n1112;
+       }
+       else
+       {
+
+        return 'grey'
+      }
+    })
+      .attr('d', d3.geo.path().projection(projectionLondon))
+      .style('stroke', '#f1f1f1')
+      .style('stroke-width', .25);
 
 
-constituencies_london = setCentroids(inset, constituencies_london_map);
+      var p = map.selectAll('.E09000002').attr("d");
+      setClone(p, mapAnnotations);
 
- setInteractivity()
 
-});
+      constituencies_london = setCentroids(inset, constituencies_london_map);
+
+      setInteractivity()
+
+    });
 
 
 function setClone(path, svg)
 {
 	clone=svg.append("g")
-  		.attr("id","clone")
-		.append("path")
-		.attr("class","selected");
+  .attr("id","clone")
+  .append("path")
+  .attr("class","selected");
 
-	clone.attr("d",path);
+  clone.attr("d",path);
 }
 
 
@@ -256,149 +255,175 @@ function setCentroids(_svg, object)
 		var id = this.getAttribute("class").split(" ")[0];
 
 		if(!object[id]) {
-				object[id]={
-					centroids:[],
-					paths:[]
-				};
-			}
+      object[id]={
+       centroids:[],
+       paths:[]
+     };
+   }
 
 
-		object[id].centroids.push(getCentroid(this));
-		object[id].paths.push(id);
-	});
+   object[id].centroids.push(getCentroid(this));
+   object[id].paths.push(id);
+ });
 
 
 	return d3.entries(object).map(function(d){
-			return {
-				id:d.key,
-				paths:d.value.paths,
-				centroid:[
-					d3.mean(d.value.centroids,function(c){
-						return c[0]
-					}),
-					d3.mean(d.value.centroids,function(c){
-						return c[1]
-					})
-				]
-			}
-		});
+   return {
+    id:d.key,
+    paths:d.value.paths,
+    centroid:[
+    d3.mean(d.value.centroids,function(c){
+      return c[0]
+    }),
+    d3.mean(d.value.centroids,function(c){
+      return c[1]
+    })
+    ]
+  }
+});
 
 }
 
-  function getScale(features,s)
-  {
-    var bbox = d3.geo.bounds(features);
-    var dx = bbox[1][0] - bbox[0][0];
-    var dy = bbox[1][1] - bbox[0][1];
-    var hscale  = (s*width)  / dx;
-    var vscale  = (s*height) / dy;
+function getScale(features,s)
+{
+  var bbox = d3.geo.bounds(features);
+  var dx = bbox[1][0] - bbox[0][0];
+  var dy = bbox[1][1] - bbox[0][1];
+  var hscale  = (s*width)  / dx;
+  var vscale  = (s*height) / dy;
 
-    return (hscale < vscale) ? hscale : vscale;
-  }
+  return (hscale < vscale) ? hscale : vscale;
+}
 
-  function getCenter(features)
-  {
-    var bbox = d3.geo.bounds(features);
-    var x = (bbox[0][0] + bbox[1][0]) / 2;
-    var y = (bbox[0][1] + bbox[1][1]) / 2;
+function getCenter(features)
+{
+  var bbox = d3.geo.bounds(features);
+  var x = (bbox[0][0] + bbox[1][0]) / 2;
+  var y = (bbox[0][1] + bbox[1][1]) / 2;
 
-    return [x,y];
-  }
+  return [x,y];
+}
 
 function setInteractivity()
 {
- map
-  .on('mousemove', function(d)
-  {
 
-  	var coords = d3.mouse(this);
-    var id = findClosest(coords, constituencies).id;
 
-  	var h = map.selectAll('.'+id).attr("d");
+  new TouchEvents(map, {
+    element:map.node(),
 
-    var name = map.select('.'+id).attr('class').split(" ")[3].split("_").join(" ");
+    touchStartCallback:function(coords){console.log(coords)},
+    touchEndCallback:function(coords){console.log(coords)},
+    touchMoveCallback:function(coords)
+    {
+      var id = findClosest(coords, constituencies).id;
+      var h = map.selectAll('.'+id).attr("d");
+      var name = map.select('.'+id).attr('class').split(" ")[3].split("_").join(" ");
 
-	d3.select('#interact g path')
-	.attr('d', h)
-	.attr('class','selected');
+     d3.select('#interact g path')
+     .attr('d', h)
+     .attr('class','selected');
 
-	d3.select('#tooltip')
-	.style('top', d3.event.clientY + 20 + 'px')
-	.style('left', d3.event.clientX + 'px')
+     d3.select('#tooltip')
+     .style('top', coords[1] + 20 + 'px')
+     .style('left', coords[0] + 'px')
 
-	d3.select('#tooltip p')
-	.text(name)
-	
-	
+     d3.select('#tooltip p')
+     .text(name)
+      }
   })
-  .on("mouseout", function(d){
-		d3.select('#interact g path')
-	.attr('d', '')
-	.attr('class','')
+
+
+map
+ .on('mousemove', function(d)
+ {
+
+
+   var coords = d3.mouse(this);
+   var id = findClosest(coords, constituencies).id;
+
+   var h = map.selectAll('.'+id).attr("d");
+
+   var name = map.select('.'+id).attr('class').split(" ")[3].split("_").join(" ");
+
+   d3.select('#interact g path')
+   .attr('d', h)
+   .attr('class','selected');
+
+   d3.select('#tooltip')
+   .style('top', d3.event.clientY + 20 + 'px')
+   .style('left', d3.event.clientX + 'px')
+
+   d3.select('#tooltip p')
+   .text(name)
+
+
+ })
+ .on("mouseout", function(d){
+  d3.select('#interact g path')
+  .attr('d', '')
+  .attr('class','')
 });
 
 
 
-  inset
-  .on('mousemove', function(d)
-  {
-  	var coords = d3.mouse(this);
-  	
-  	var h = inset.selectAll('.'+ findClosest(coords, constituencies_london).id).attr("d");
+ inset
+ .on('mousemove', function(d)
+ {
+   var coords = d3.mouse(this);
 
-	d3.select('#interact_inset g path')
-	.attr('d', h)
-	.attr('class','selected')
-	
-  })
-  .on("mouseout", function(d){
-		d3.select('#interact_inset g path')
-	.attr('d', '')
-	.attr('class','')
+   var h = inset.selectAll('.'+ findClosest(coords, constituencies_london).id).attr("d");
+
+   d3.select('#interact_inset g path')
+   .attr('d', h)
+   .attr('class','selected')
+
+ })
+ .on("mouseout", function(d){
+  d3.select('#interact_inset g path')
+  .attr('d', '')
+  .attr('class','')
 })
 
 }
 
- 
 
 
+function findClosest(coords,array) {
 
-  function findClosest(coords,array) {
+  var closest_constituency=null,
+  dist=1000000;
 
-        var closest_constituency=null,
-            dist=1000000;
+  array.every(function(constituency){
 
-        array.every(function(constituency){
-            
-            var c_centre=constituency.centroid,
-                __dist=getDistance(coords[0],coords[1],c_centre[0],c_centre[1]);
+    var c_centre=constituency.centroid,
+    __dist=getDistance(coords[0],coords[1],c_centre[0],c_centre[1]);
 
             //console.log("check",coords,"against",c_centre,__dist,constituency.key)
 
             if(__dist<dist) {
-                closest_constituency=constituency;
-                dist=__dist;
+              closest_constituency=constituency;
+              dist=__dist;
             }
 
             return __dist>5;
             
-        });
-
-        
+          });
 
 
-        return closest_constituency;
-    }
 
- function getDistance(x1,y1,x2,y2)
- {
- 	return Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
- }
 
- function getCentroid(element)
- {
- 	var bbox = element.getBBox();
- 	return [bbox.x + bbox.width/2, bbox.y + bbox.height/2];
+  return closest_constituency;
+}
+
+function getDistance(x1,y1,x2,y2)
+{
+  return Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+}
+
+function getCentroid(element)
+{
+  var bbox = element.getBBox();
+  return [bbox.x + bbox.width/2, bbox.y + bbox.height/2];
 }
 
 
