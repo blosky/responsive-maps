@@ -311,8 +311,9 @@ function setInteractivity()
   new TouchEvents(map, {
     element:map.node(),
 
-    touchStartCallback:function(coords){console.log(coords)},
-    touchEndCallback:function(coords){console.log(coords)},
+    touchStartCallback:function(coords){console.log('start')},
+    touchEndCallback:function(coords){d3.select('#tooltip p')
+     .text('')},
     touchMoveCallback:function(coords)
     {
       var id = findClosest(coords, constituencies).id;
